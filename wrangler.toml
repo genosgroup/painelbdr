@@ -1,0 +1,17 @@
+name = "painelbdr"
+main = "src/index.js"
+compatibility_date = "2026-08-30"
+
+# A pagina do painel. Tudo que esta em public/ e servido direto pelo
+# Cloudflare, sem custo de execucao.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "none"
+
+# Onde os lancamentos ficam guardados.
+# Crie o namespace com:  npx wrangler kv namespace create PAINEL
+# e cole o id que o comando imprimir no lugar do COLE_O_ID_AQUI.
+[[kv_namespaces]]
+binding = "PAINEL"
+id = "COLE_O_ID_AQUI"

@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9E%3C/text%3E%3C/svg%3E">
+<title>Painel do BDR Genos</title>
+<style>
+  :root{
+    --ink:#08090D;
+    --surf:#0F1117;
+    --surf-2:#151822;
+    --paper:#F4F1EC;
+    --muted:#8E94A2;
+    --dim:#5C6270;
+    --line:rgba(255,255,255,.09);
+    --line-2:rgba(255,255,255,.16);
+    --a1:#FF8C42;
+    --a2:#E8A04D;
+    --a3:#A86A3D;
+    --avtxt:#14100C; /* iniciais dos avatares, igual para os tres */
+    --gil:#C2571B;   /* laranja escuro  */
+    --raf:#FF8C42;   /* laranja médio   */
+    --isa:#F8D9A6;   /* laranja claro   */
+    --ok:#3FAE74;
+    --warn:#E0603C;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --r:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:
+      radial-gradient(1100px 640px at 96% -14%,rgba(255,140,66,.10),transparent 62%),
+      radial-gradient(820px 540px at -4% 108%,rgba(232,160,77,.06),transparent 58%),
+      var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  #app{max-width:1420px;margin:0 auto;padding:clamp(16px,2.4vw,34px)}
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+  button{cursor:pointer;background:none;border:none}
+  :focus-visible{outline:2px solid var(--a1);outline-offset:2px;border-radius:6px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+
+  /* ---------- topo ---------- */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:14px 0 18px;border-bottom:1px solid var(--line);margin-bottom:clamp(20px,2.4vw,32px)}
+  .top .id{display:flex;align-items:center;gap:14px}
+  .mark{font-size:11px;letter-spacing:.3em;font-weight:800}
+  .mark b{color:var(--a2)}
+  .who{display:flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surf)}
+  .who .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--avtxt)}
+  .who .nm{font-size:13px;font-weight:700}
+  .who .rl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .lnk{font-size:12px;color:var(--muted);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+  .lnk:hover{color:var(--a2)}
+  .wk{text-align:right;font-size:12px;color:var(--muted);line-height:1.7;font-weight:600}
+  .wk b{color:var(--paper)}
+
+  /* ---------- tipografia ---------- */
+  h1{font-size:clamp(24px,3vw,40px);font-weight:800;letter-spacing:-.025em;line-height:1.05;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--a1)}
+  h2{font-size:clamp(15px,1.5vw,21px);font-weight:800;letter-spacing:-.01em}
+  .eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--a3);font-weight:800;margin-bottom:7px}
+  .sub{font-size:13px;color:var(--muted);font-weight:600;line-height:1.5}
+  .shead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  section{margin-bottom:clamp(26px,3vw,44px)}
+
+  /* ---------- superficies ---------- */
+  .card{border:1px solid var(--line);border-radius:var(--r);background:var(--surf);padding:clamp(15px,1.6vw,24px)}
+  .card.acc{border-color:rgba(255,140,66,.32);background:linear-gradient(165deg,rgba(255,140,66,.09),var(--surf) 60%)}
+  .grid{display:grid;gap:clamp(11px,1.2vw,18px)}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g21{grid-template-columns:1.3fr 1fr}
+
+  /* ---------- entrada ---------- */
+  .gate{min-height:76vh;display:grid;place-items:center}
+  .gatebox{width:min(720px,100%);text-align:center}
+  .perfis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px}
+  .perfil{border:1px solid var(--line);border-radius:var(--r);background:var(--surf);padding:26px 18px;
+    display:flex;flex-direction:column;align-items:center;gap:12px;transition:border-color .2s,transform .2s}
+  .perfil:hover{border-color:var(--line-2);transform:translateY(-3px)}
+  .perfil.on{border-color:var(--a1);background:linear-gradient(165deg,rgba(255,140,66,.13),var(--surf))}
+  .perfil .av{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:800;color:var(--avtxt)}
+  .perfil .nm{font-size:15px;font-weight:800}
+  .perfil .rl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .pinbox{margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:14px}
+  .pin{display:flex;gap:10px}
+  .pin input{width:54px;height:62px;text-align:center;font-size:24px;font-weight:800;font-family:var(--mono);
+    background:var(--surf);border:1px solid var(--line-2);border-radius:12px;outline:none}
+  .pin input:focus{border-color:var(--a1);background:rgba(255,140,66,.07)}
+  .err{color:var(--warn);font-size:13px;font-weight:700;min-height:20px}
+
+  /* ---------- formulario ---------- */
+  .form{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+  .fld{display:flex;flex-direction:column;gap:7px}
+  .fld label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800;line-height:1.3}
+  .fld label i{font-style:normal;color:var(--dim);text-transform:none;letter-spacing:0;font-weight:600;display:block;margin-top:3px;font-size:11px}
+  .fld input,.fld textarea,.fld select{background:var(--surf-2);border:1px solid var(--line);border-radius:10px;
+    padding:12px 13px;outline:none;font-weight:700;transition:border-color .15s,background .15s}
+  .fld input[type=number]{font-family:var(--mono);font-size:19px}
+  .fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--a1);background:rgba(255,140,66,.06)}
+  .fld.wide{grid-column:1/-1}
+  .fld textarea{min-height:64px;resize:vertical;font-weight:500;font-size:14px;line-height:1.5}
+  .btn{border-radius:11px;padding:13px 22px;font-weight:800;font-size:14px;letter-spacing:.02em;
+    border:1px solid var(--a1);background:linear-gradient(160deg,var(--a1),var(--a3));color:#160b03;transition:filter .15s,transform .15s}
+  .btn:hover{filter:brightness(1.1)} .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:none;border-color:var(--line-2);color:var(--paper)}
+  .btn.ghost:hover{border-color:var(--a1);color:var(--a2)}
+  .btn.sm{padding:8px 14px;font-size:12px;border-radius:9px}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;filter:none;transform:none}
+  .actions{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-top:18px}
+
+  /* ---------- numeros ---------- */
+  .stat{border:1px solid var(--line);border-radius:var(--r);background:var(--surf);padding:clamp(13px,1.4vw,20px)}
+  .stat .v{font-size:clamp(24px,3vw,42px);font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+  .stat .v small{font-size:.42em;color:var(--dim);font-weight:700}
+  .stat .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-top:9px;line-height:1.4}
+  .stat .d{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.45}
+
+  /* ---------- medidor ---------- */
+  .gauge{margin-top:13px}
+  .gauge .tr{height:11px;border-radius:99px;background:rgba(255,255,255,.07);position:relative;overflow:visible}
+  .gauge .fl{height:100%;border-radius:99px;max-width:100%}
+  .gauge .mk{position:absolute;top:-5px;bottom:-5px;width:2px;background:rgba(255,255,255,.5)}
+  .gauge .cp{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px;font-weight:700}
+  .pill{display:inline-block;padding:4px 11px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+  .pill.ok{background:rgba(63,174,116,.15);color:var(--ok);border:1px solid rgba(63,174,116,.38)}
+  .pill.warn{background:rgba(224,96,60,.13);color:var(--warn);border:1px solid rgba(224,96,60,.38)}
+  .pill.neutral{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line-2)}
+
+  /* ---------- tabela ---------- */
+  .twrap{overflow-x:auto;border-radius:var(--r)}
+  table{width:100%;border-collapse:collapse;min-width:640px}
+  th{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--a2);text-align:left;
+    padding:11px 12px;border-bottom:1px solid rgba(255,140,66,.26);font-weight:800;white-space:nowrap}
+  th.n,td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+  td{font-size:14px;padding:11px 12px;border-bottom:1px solid var(--line);color:#CFD2DA}
+  td.b{font-weight:700;color:var(--paper);font-family:var(--sans)}
+  tr:hover td{background:rgba(255,255,255,.022)}
+  tr.tot td{border-bottom:none;border-top:2px solid rgba(255,140,66,.38);font-weight:800;color:var(--paper);padding-top:14px}
+  .rafc{color:var(--raf);font-weight:800}
+  .isac{color:var(--isa);font-weight:800}
+
+  /* ---------- barras de area ---------- */
+  .area{padding:14px 0;border-bottom:1px solid var(--line)}
+  .area:last-child{border-bottom:none}
+  .area .hd{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+  .area .nm{font-size:15px;font-weight:800}
+  .area .df{font-size:11px;color:var(--dim);font-weight:600}
+  .area .wn{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .cmp{display:grid;grid-template-columns:78px 1fr 66px;gap:11px;align-items:center;margin-top:6px}
+  .cmp .w{font-size:11px;font-weight:800}
+  .cmp .tr{height:14px;border-radius:6px;background:rgba(255,255,255,.05);overflow:hidden}
+  .cmp .fl{height:100%;border-radius:6px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+  .cmp .v{font-size:13px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+
+  /* ---------- 12 blocos ---------- */
+  .opps{display:grid;grid-template-columns:repeat(12,1fr);gap:8px}
+  .opp{aspect-ratio:1;border-radius:11px;border:1px solid var(--line);background:var(--surf-2);
+    display:grid;place-items:center;font-weight:800;font-size:clamp(11px,1.2vw,18px);color:var(--dim);
+    font-family:var(--mono);transition:transform .3s}
+  .opp.r{background:linear-gradient(160deg,var(--raf),rgba(255,140,66,.35));border-color:var(--raf);color:var(--avtxt)}
+  .opp.i{background:linear-gradient(160deg,var(--isa),rgba(248,217,166,.32));border-color:var(--isa);color:var(--avtxt)}
+  .leg{display:flex;gap:18px;flex-wrap:wrap;margin-top:15px}
+  .leg span{display:flex;align-items:center;gap:8px;font-size:12px;color:#C3C7D1;font-weight:700}
+  .leg i{width:12px;height:12px;border-radius:4px;display:inline-block}
+
+  /* ---------- funil ---------- */
+  .fun{display:flex;flex-direction:column;gap:6px}
+  .fst{display:flex;justify-content:space-between;align-items:center;gap:12px;border-radius:10px;
+    padding:11px 15px;border:1px solid var(--line);background:var(--surf-2);font-size:13px;font-weight:700}
+  .fst.hi{border-color:rgba(255,140,66,.4);background:rgba(255,140,66,.08)}
+  .fst .rt{font-size:11px;color:var(--muted);font-weight:700;margin-right:10px}
+  .fst .v{font-family:var(--mono);font-weight:800;font-variant-numeric:tabular-nums}
+
+  /* ---------- abas ---------- */
+  .tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+  .tab{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--surf);
+    font-size:13px;font-weight:800;color:var(--muted);transition:border-color .2s,color .2s,background .2s}
+  .tab:hover{border-color:var(--line-2);color:var(--paper)}
+  .tab.on{border-color:var(--a1);background:rgba(255,140,66,.12);color:var(--a2)}
+  .tab .dt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+
+  /* ---------- evolucao semanal ---------- */
+  .evo{display:flex;align-items:flex-end;gap:clamp(4px,.7vw,9px);height:clamp(150px,20vh,210px);margin-top:10px}
+  .evo .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+  .evo .plot{position:relative;width:100%;flex:1;display:flex;align-items:flex-end}
+  .evo .bar{width:100%;border-radius:7px 7px 3px 3px;min-height:3px;transition:height .5s cubic-bezier(.2,.7,.2,1)}
+  .evo .mt{position:absolute;left:-2px;right:-2px;height:2px;background:rgba(255,255,255,.45);border-radius:2px}
+  .evo .vl{font-size:11px;font-weight:800;margin-bottom:6px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .evo .lb{font-size:9px;color:var(--dim);margin-top:9px;font-weight:700;text-align:center;line-height:1.25;letter-spacing:.04em}
+  .evolegend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:11px;color:var(--muted);font-weight:700}
+  .evolegend span{display:flex;align-items:center;gap:7px}
+  .evolegend i{width:12px;height:3px;border-radius:2px;display:inline-block}
+
+  /* ---------- tendencia ---------- */
+  .tend{font-size:12px;font-weight:800;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tend.up{color:var(--ok)} .tend.dn{color:var(--warn)} .tend.flat{color:var(--dim)}
+
+  /* ---------- avisos ---------- */
+  .alert{border-radius:12px;padding:14px 16px;font-size:13px;font-weight:700;line-height:1.5;border:1px solid}
+  .alert.info{border-color:rgba(255,140,66,.4);background:rgba(255,140,66,.09);color:var(--paper)}
+  .alert.bad{border-color:rgba(224,96,60,.45);background:rgba(224,96,60,.10);color:#F3C9BC}
+  .alert b{color:var(--a2)}
+  .empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:14px;line-height:1.6}
+
+  /* ---------- toast ---------- */
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--surf-2);border:1px solid var(--line-2);border-radius:12px;padding:13px 20px;
+    font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:99;
+    box-shadow:0 14px 44px rgba(0,0,0,.6);max-width:min(520px,92vw);line-height:1.45}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.ok{border-color:rgba(63,174,116,.5)}
+  #toast.bad{border-color:rgba(224,96,60,.55)}
+
+  @media(max-width:980px){
+    .g2,.g3,.g4,.g21{grid-template-columns:1fr}
+    .g4{grid-template-columns:1fr 1fr}
+    .form{grid-template-columns:1fr 1fr}
+    .perfis{grid-template-columns:1fr}
+    .opps{grid-template-columns:repeat(6,1fr)}
+    .wk{text-align:left}
+  }
+  @media(max-width:560px){
+    .form{grid-template-columns:1fr}
+    .g4{grid-template-columns:1fr}
+    /* no celular o cartao de perfil vira linha, para os tres caberem sem rolar */
+    .perfil{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;
+      column-gap:15px;align-items:center;text-align:left;padding:15px 18px}
+    .perfil .av{grid-row:1/3;width:44px;height:44px;font-size:15px}
+    .perfil .nm{align-self:end;font-size:15px}
+    .perfil .rl{align-self:start}
+    .gate{min-height:auto;padding-top:8vh}
+    .pin input{width:48px;height:56px;font-size:21px}
+    .top{padding-top:6px}
+  }
+</style>
+
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+
+<script id="estado" type="application/json">{"v":1,"lancamentos":[]}</script>
+
+<script id="app-js">
+(function(){
+"use strict";
+
+/* ========== CONSTANTES DO MODELO ========== */
+const PRIMEIRA_PARCELA = 3500;
+const CONVERSAO_BASE   = 0.13;
+const BONUS_PROPOSTA   = 25;
+const TETO_VENDAS      = 12;
+const METAS = [{n:6,bonus:500,rot:"Meta mínima"},{n:9,bonus:1000,rot:"Meta ideal"},{n:12,bonus:2000,rot:"Super meta"}];
+
+const SEMANAS = [
+  {ini:"2026-08-31",rot:"Setembro · Semana 1",leads:30,rampa:.25},
+  {ini:"2026-09-07",rot:"Setembro · Semana 2",leads:35,rampa:.35},
+  {ini:"2026-09-14",rot:"Setembro · Semana 3",leads:40,rampa:.45},
+  {ini:"2026-09-21",rot:"Setembro · Semana 4",leads:45,rampa:.55},
+  {ini:"2026-09-28",rot:"Outubro · Semana 1",leads:50,rampa:.55},
+  {ini:"2026-10-05",rot:"Outubro · Semana 2",leads:50,rampa:.60},
+  {ini:"2026-10-12",rot:"Outubro · Semana 3",leads:50,rampa:.65},
+  {ini:"2026-10-19",rot:"Outubro · Semana 4",leads:50,rampa:.70},
+  {ini:"2026-10-26",rot:"Novembro · Semana 1",leads:50,rampa:.75},
+  {ini:"2026-11-02",rot:"Novembro · Semana 2",leads:50,rampa:.80},
+  {ini:"2026-11-09",rot:"Novembro · Semana 3",leads:50,rampa:.85},
+  {ini:"2026-11-16",rot:"Novembro · Semana 4",leads:50,rampa:1.00},
+  {ini:"2026-11-23",rot:"Fechamento · Semana 13",leads:50,rampa:1.00},
+  {ini:"2026-11-30",rot:"Último dia do período",leads:50,rampa:1.00}
+];
+const FERIADOS = {"2026-09-07":"Feriado. Sem operação."};
+
+const PESSOAS = {
+  gilvan:  {nome:"Gilvan Brito",   curto:"Gilvan",   ini:"GB", papel:"Admin", cor:"var(--gil)", hex:"#C2571B"},
+  rafael:  {nome:"Rafael Abreu",   curto:"Rafael",   ini:"RA", papel:"BDR",   cor:"var(--raf)", hex:"#FF8C42"},
+  isabella:{nome:"Isabella Borges",curto:"Isabella", ini:"IB", papel:"BDR",   cor:"var(--isa)", hex:"#F8D9A6"}
+};
+const BDRS = ["rafael","isabella"];
+
+const CAMPOS = [
+  {k:"leads",      ab:"Leads",     r:"Leads novos trabalhados", h:"Leads que entraram na sua fila hoje"},
+  {k:"tentativas", ab:"Tentat.",   r:"Tentativas de ligação",   h:"Toda discagem, atendida ou não"},
+  {k:"contatos",   ab:"Contatos",  r:"Contatos realizados",     h:"Alguém atendeu do outro lado"},
+  {k:"decisores",  ab:"Decisor",   r:"Contatos com decisor",    h:"Você falou com quem decide"},
+  {k:"agendadas",  ab:"Agend.",    r:"Reuniões agendadas",      h:"Data e hora combinadas"},
+  {k:"realizadas", ab:"Realiz.",   r:"Reuniões realizadas",     h:"A reunião aconteceu"},
+  {k:"noshow",     ab:"No-show",   r:"No-shows",                h:"Agendou e não apareceu"},
+  {k:"propostas",  ab:"Propostas", r:"Propostas qualificadas",  h:"Proposta apresentada e validada"},
+  {k:"vendas",     ab:"Vendas",    r:"Vendas fechadas",         h:"Contrato assinado"}
+];
+
+/* ========== ESTADO ========== */
+let ESTADO, PERFIL=null, TOKEN=null, SOMENTE_LEITURA=false, EDITANDO=null, ABA="geral";
+try{ ESTADO = JSON.parse(document.getElementById("estado").textContent); }
+catch(e){ ESTADO = {v:1,lancamentos:[],pins:{}}; }
+if(!Array.isArray(ESTADO.lancamentos)) ESTADO.lancamentos=[];
+
+/* ========== UTIL ========== */
+const $ = s => document.querySelector(s);
+const el = (t,c,h) => { const n=document.createElement(t); if(c)n.className=c; if(h!=null)n.innerHTML=h; return n; };
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const n0 = v => (v||0).toLocaleString("pt-BR");
+const n1 = v => (v||0).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+const n2 = v => (v||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl = v => "R$ " + n2(v);
+/* metas de quantidade sempre em numero inteiro, arredondamento convencional: 1,49 vira 1 e 1,50 vira 2 */
+const metaInt = v => Math.round((Number(v)||0) + 1e-9);
+const pct = (a,b) => b>0 ? (a/b*100) : 0;
+const pctTxt = (a,b) => b>0 ? n1(a/b*100)+"%" : "-";
+const hojeISO = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const dataBR = iso => { const p=String(iso||"").split("-"); return p.length===3 ? p[2]+"/"+p[1] : iso; };
+const diaSemana = iso => { const p=String(iso).split("-").map(Number); const d=new Date(p[0],p[1]-1,p[2]);
+  return ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][d.getDay()]; };
+
+function semanaDe(iso){
+  let idx=-1;
+  for(let i=0;i<SEMANAS.length;i++){ if(iso>=SEMANAS[i].ini) idx=i; else break; }
+  return idx;
+}
+function semanaAtual(){ const i=semanaDe(hojeISO()); return i<0?0:Math.min(i,SEMANAS.length-1); }
+function metaAgendamento(sem){ return sem.leads * CONVERSAO_BASE * sem.rampa; }
+function metaSemana(sem){ return metaInt(metaAgendamento(sem)); }
+
+function comissaoDaVenda(n){ return PRIMEIRA_PARCELA * (0.10 + 0.05*n); }
+function comissaoAcumulada(qtd){ let t=0; for(let k=1;k<=Math.min(qtd,TETO_VENDAS);k++) t+=comissaoDaVenda(k); return t; }
+function metaBatida(vendasTime){ let m=null; for(const x of METAS) if(vendasTime>=x.n) m=x; return m; }
+
+/* ========== AGREGACAO ========== */
+function lancsDe(bdr, deIso, ateIso){
+  return ESTADO.lancamentos.filter(l =>
+    (!bdr || l.bdr===bdr) && (!deIso || l.data>=deIso) && (!ateIso || l.data<=ateIso));
+}
+function soma(lista){
+  const t={}; CAMPOS.forEach(c=>t[c.k]=0);
+  lista.forEach(l => CAMPOS.forEach(c => { t[c.k] += Number(l[c.k])||0; }));
+  return t;
+}
+function totalPeriodo(bdr){ return soma(lancsDe(bdr)); }
+function totalSemana(bdr,idx){
+  const s=SEMANAS[idx]; const fim = SEMANAS[idx+1] ? SEMANAS[idx+1].ini : "2999-12-31";
+  return soma(ESTADO.lancamentos.filter(l => (!bdr||l.bdr===bdr) && l.data>=s.ini && l.data<fim));
+}
+function vendasTime(){ return BDRS.reduce((a,b)=>a+totalPeriodo(b).vendas,0); }
+function bonusDe(bdr){
+  const vt = vendasTime(); const m = metaBatida(vt);
+  const v = totalPeriodo(bdr).vendas;
+  const part = vt>0 ? v/vt*100 : 0;
+  if(!m || vt===0) return {valor:0, part:part, meta:null};
+  return {valor: m.bonus * (v/vt), part: part, meta:m};
+}
+function ganhoDe(bdr){
+  const t = totalPeriodo(bdr);
+  const com = comissaoAcumulada(t.vendas);
+  const prop = t.propostas * BONUS_PROPOSTA;
+  const b = bonusDe(bdr);
+  return {comissao:com, propostas:prop, bonus:b.valor, part:b.part, meta:b.meta, total:com+prop+b.valor, vendas:t.vendas};
+}
+
+/* ========== TOAST ========== */
+let toastT=null;
+function toast(msg, tipo){
+  const t=$("#toast"); t.textContent=msg; t.className="on "+(tipo||"");
+  clearTimeout(toastT); toastT=setTimeout(()=>{ t.className=""; }, 4200);
+}
+
+/* ========== PERSISTENCIA ==========
+   Os lancamentos ficam no Cloudflare KV, atras da API do proprio site (/api/*).
+   O navegador nunca guarda o dado como fonte da verdade: ele so mantem uma
+   copia de seguranca, usada se a API estiver fora do ar na hora de lancar. */
+
+const CHAVE_TOKEN = "genosToken_v1";
+
+async function api(rota, opcoes){
+  const o = Object.assign({headers:{}}, opcoes||{});
+  o.headers = Object.assign({"content-type":"application/json"}, o.headers);
+  if(TOKEN) o.headers["authorization"] = "Bearer " + TOKEN;
+  if(o.corpo!==undefined){ o.body = JSON.stringify(o.corpo); delete o.corpo; }
+  const r = await fetch(rota, o);
+  let dados = null;
+  try{ dados = await r.json(); }catch(e){}
+  if(!r.ok){
+    const err = new Error((dados && dados.mensagem) || "Falha na comunicação com o servidor.");
+    err.codigo = (dados && dados.erro) || "falha_rede";
+    throw err;
+  }
+  return dados;
+}
+
+/* copia de seguranca no navegador de quem lanca, usada se a API falhar */
+const CHAVE_BACKUP = "genosBackupProspeccao_v1";
+function gravarBackup(){
+  try{ localStorage.setItem(CHAVE_BACKUP, JSON.stringify({em:new Date().toISOString(), lancamentos:ESTADO.lancamentos})); }catch(e){}
+}
+function lerBackup(){
+  try{ const b=JSON.parse(localStorage.getItem(CHAVE_BACKUP)||"null");
+    return (b && Array.isArray(b.lancamentos) && b.lancamentos.length) ? b : null; }catch(e){ return null; }
+}
+
+function guardarToken(t){
+  TOKEN = t;
+  try{ t ? localStorage.setItem(CHAVE_TOKEN,t) : localStorage.removeItem(CHAVE_TOKEN); }catch(e){}
+}
+
+/* a sessao caiu: volta para a tela de PIN sem perder o que esta na tela */
+function sessaoCaiu(){
+  guardarToken(null); PERFIL=null; EDITANDO=null; SOMENTE_LEITURA=false;
+  try{ localStorage.removeItem("genosPerfil"); }catch(e){}
+  render();
+  toast("Sua sessão expirou. Entre de novo com o seu PIN.","bad");
+}
+
+/* le os lancamentos do servidor e redesenha a tela */
+async function carregarEstado(){
+  try{
+    const d = await api("/api/estado");
+    ESTADO.lancamentos = Array.isArray(d.lancamentos) ? d.lancamentos : [];
+    ESTADO.rev = d.rev;
+    SOMENTE_LEITURA = false;
+    render();
+    return true;
+  }catch(e){
+    SOMENTE_LEITURA = true;
+    render();
+    return false;
+  }
+}
+
+/* toda gravacao passa por aqui: manda so o que mudou e recebe a lista inteira
+   de volta, ja consolidada pelo servidor */
+async function gravar(rota, corpo, msgOk){
+  if(!TOKEN){ toast("Entre com o seu PIN para poder lançar.","bad"); return false; }
+  try{
+    const d = await api(rota, {method:"POST", corpo:corpo});
+    ESTADO.lancamentos = Array.isArray(d.lancamentos) ? d.lancamentos : ESTADO.lancamentos;
+    ESTADO.rev = d.rev;
+    SOMENTE_LEITURA = false;
+    gravarBackup();
+    if(msgOk) toast(msgOk,"ok");
+    return true;
+  }catch(e){
+    if(e.codigo==="sem_sessao"){ sessaoCaiu(); }
+    else if(e.codigo==="sem_permissao"){ toast(e.message,"bad"); }
+    else if(e.codigo==="dados_invalidos"||e.codigo==="nao_encontrado"){ toast(e.message,"bad"); }
+    else { toast("Não deu para salvar agora. Confira a internet e tente de novo.","bad"); }
+    return false;
+  }
+}
+
+function salvarLancamento(reg, msgOk){ return gravar("/api/lancamento", {lancamento:reg}, msgOk); }
+function excluirLancamento(id, msgOk){ return gravar("/api/lancamento/excluir", {id:id}, msgOk); }
+function importarLancamentos(lista, msgOk){ return gravar("/api/lancamentos/importar", {lancamentos:lista}, msgOk); }
+
+/* ========== DATAS E METAS ACUMULADAS ========== */
+function dtDe(iso){ const p=String(iso).split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
+function isoDe(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function diasUteis(iniIso, fimIso){
+  let d=dtDe(iniIso); const f=dtDe(fimIso); let n=0, guarda=0;
+  while(d<=f && guarda++<400){ const w=d.getDay(); const iso=isoDe(d);
+    if(w>=1 && w<=5 && !FERIADOS[iso]) n++;
+    d.setDate(d.getDate()+1); }
+  return n;
+}
+function fimDaSemana(i){
+  const prox = SEMANAS[i+1] ? SEMANAS[i+1].ini : null;
+  if(!prox) return "2026-11-30";
+  const d=dtDe(prox); d.setDate(d.getDate()-1); return isoDe(d);
+}
+function diasUteisSemana(i){ return Math.max(diasUteis(SEMANAS[i].ini, fimDaSemana(i)), 1); }
+
+/* data de referencia: hoje, ou o ultimo dia lancado se for posterior */
+function dataRef(){
+  let ult=""; ESTADO.lancamentos.forEach(l=>{ if(l.data>ult) ult=l.data; });
+  const h=hojeISO(); return ult>h ? ult : h;
+}
+
+/* meta de agendamento acumulada do periodo ate a data informada */
+function metaAcumuladaAte(iso){
+  let t=0;
+  for(let i=0;i<SEMANAS.length;i++){
+    const s=SEMANAS[i]; if(s.ini>iso) break;
+    const meta=metaAgendamento(s); const fim=fimDaSemana(i);
+    if(fim<=iso){ t+=meta; }
+    else { const tot=diasUteisSemana(i); const feito=Math.min(diasUteis(s.ini, iso), tot); t += meta*(feito/tot); }
+  }
+  return t;
+}
+function rotCurto(s){
+  const p=s.rot.split(" · ");
+  if(p.length<2) return "final";
+  return p[1].replace("Semana ","S")+" "+p[0].slice(0,3).toLowerCase();
+}
+
+/* ========== AREAS DE DESEMPENHO ========== */
+const AREAS_DEF = [
+  {nm:"1. Volume",               df:"tentativas de ligação",           val:t=>t.tentativas,                fmt:v=>n0(v),      un:"" },
+  {nm:"2. Alcance",              df:"contato sobre tentativa de ligação", val:t=>pct(t.contatos,t.tentativas), fmt:v=>n1(v)+"%", un:"pp"},
+  {nm:"3. Contorno da recepção", df:"decisor sobre contato realizado", val:t=>pct(t.decisores,t.contatos), fmt:v=>n1(v)+"%", un:"pp"},
+  {nm:"4. Pitch",                df:"agendamento sobre decisor",       val:t=>pct(t.agendadas,t.decisores),fmt:v=>n1(v)+"%", un:"pp"},
+  {nm:"5. Presença",             df:"realizada sobre agendada",        val:t=>pct(t.realizadas,t.agendadas),fmt:v=>n1(v)+"%",un:"pp"},
+  {nm:"6. Qualificação",         df:"proposta sobre reunião realizada",val:t=>pct(t.propostas,t.realizadas),fmt:v=>n1(v)+"%",un:"pp"},
+  {nm:"7. Fechamento",           df:"venda sobre proposta",            val:t=>pct(t.vendas,t.propostas),   fmt:v=>n1(v)+"%", un:"pp"}
+];
+
+/* ========== SERIE SEMANAL ========== */
+function serieSemanal(bdr){
+  const hoje=dataRef(); const out=[];
+  for(let i=0;i<SEMANAS.length;i++){
+    const s=SEMANAS[i]; if(s.ini>hoje) break;
+    const t=totalSemana(bdr,i);
+    out.push({i:i, rot:rotCurto(s), completa:s.rot, meta:metaSemana(s), t:t});
+  }
+  return out;
+}
+
+/* ========== BLOCO DE DESEMPENHO INDIVIDUAL ========== */
+function blocoIndividual(bdr, opcoes){
+  const o = opcoes||{};
+  const p = PESSOAS[bdr];
+  const per = totalPeriodo(bdr);
+  const idx = semanaAtual();
+  const semAtual = totalSemana(bdr, idx);
+  const semAnt = idx>0 ? totalSemana(bdr, idx-1) : null;
+  const g = ganhoDe(bdr);
+  const metaAcBruta = metaAcumuladaAte(dataRef());
+  const metaAc = metaAcBruta>0 ? Math.max(1, metaInt(metaAcBruta)) : 0;
+  const aprov = metaAc>0 ? pct(per.agendadas, metaAc) : 0;
+  const conv = pct(per.agendadas, per.leads);
+  const serie = serieSemanal(bdr);
+  const s = SEMANAS[idx];
+
+  /* --- cartoes de topo --- */
+  let h = '<section>'
+    + '<div class="shead"><div><div class="eyebrow">'+(o.titulo||"Desempenho individual")+'</div>'
+    + '<h2>'+esc(o.h2 || p.nome)+'</h2></div>'
+    + '<div class="sub">Acumulado de 31/08 até hoje, filtrado pelo responsável de cada lançamento.</div></div>'
+    + '<div class="grid g4">'
+    +   '<div class="stat" style="border-color:'+(aprov>=100?"rgba(63,174,116,.4)":"var(--line)")+'">'
+    +     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+    +       '<div class="v" style="color:'+p.cor+'">'+Math.round(aprov)+'%</div>'
+    +       '<span class="pill '+(aprov>=100?"ok":aprov>=70?"neutral":"warn")+'">'+(aprov>=100?"acima":aprov>=70?"perto":"abaixo")+'</span></div>'
+    +     '<div class="k">Desempenho geral</div>'
+    +     '<div class="d">'+n0(per.agendadas)+' agendamento'+(per.agendadas===1?"":"s")+' contra uma meta acumulada de '+n0(metaAc)+'.</div></div>'
+    +   '<div class="stat"><div class="v">'+n1(conv)+'%</div><div class="k">Taxa de conversão</div>'
+    +     '<div class="d">Agendamento sobre lead trabalhado. Conversão-base do modelo: 13%. Régua desta semana: '+n1(CONVERSAO_BASE*s.rampa*100)+'%.</div></div>'
+    +   '<div class="stat"><div class="v" style="color:'+p.cor+'">'+n0(per.vendas)+'</div><div class="k">Vendas fechadas</div>'
+    +     '<div class="d">'+(vendasTime()?n1(g.part)+"% das vendas do período.":"Nenhuma venda registrada ainda.")+'</div></div>'
+    +   '<div class="stat" style="border-color:rgba(255,140,66,.35);background:linear-gradient(165deg,rgba(255,140,66,.09),var(--surf))">'
+    +     '<div class="v" style="color:var(--a1)">'+brl(g.total)+'</div><div class="k">Total em bonificação</div>'
+    +     '<div class="d">Mais o fixo.</div></div>'
+    + '</div></section>';
+
+  /* --- funil + evolucao --- */
+  const maxEvo = Math.max(1, ...serie.map(x=>Math.max(x.t.agendadas, x.meta)));
+  h += '<section><div class="grid g21">'
+    + '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Funil do período</div><div class="fun">'
+    + funil_linha("Leads trabalhados", per.leads, "")
+    + funil_linha("Tentativas de ligação", per.tentativas, per.leads?n1(per.tentativas/per.leads)+" por lead":"")
+    + funil_linha("Contatos realizados", per.contatos, pctTxt(per.contatos,per.tentativas)+" das tentativas")
+    + funil_linha("Contatos com decisor", per.decisores, pctTxt(per.decisores,per.contatos)+" dos contatos", true)
+    + funil_linha("Reuniões agendadas", per.agendadas, pctTxt(per.agendadas,per.decisores)+" dos decisores")
+    + funil_linha("Reuniões realizadas", per.realizadas, pctTxt(per.realizadas,per.agendadas)+" das agendadas")
+    + funil_linha("No-shows", per.noshow, pctTxt(per.noshow,per.agendadas)+" das agendadas")
+    + funil_linha("Propostas qualificadas", per.propostas, pctTxt(per.propostas,per.realizadas)+" das realizadas")
+    + funil_linha("Vendas fechadas", per.vendas, pctTxt(per.vendas,per.propostas)+" das propostas", true)
+    + '</div></div>'
+    + '<div class="card"><div class="eyebrow" style="margin-bottom:4px">Evolução semana a semana</div>'
+    + '<div class="sub" style="font-size:12px;margin-bottom:6px">Agendamentos entregues contra a meta de cada semana.</div>';
+  if(!serie.length){
+    h += '<div class="empty">A operação ainda não começou. O gráfico aparece a partir de 31/08.</div>';
+  }else{
+    h += '<div class="evo">'
+      + serie.map(x=>{
+          const alt = x.t.agendadas/maxEvo*100;
+          const altM = x.meta/maxEvo*100;
+          const bateu = x.t.agendadas >= x.meta;
+          return '<div class="col"><div class="vl" style="color:'+(bateu?"var(--ok)":"var(--muted)")+'">'+n0(x.t.agendadas)+'</div>'
+            + '<div class="plot"><div class="mt" style="bottom:'+altM+'%"></div>'
+            + '<div class="bar" style="height:'+alt+'%;background:'+(bateu?"linear-gradient(180deg,var(--ok),rgba(63,174,116,.35))":"linear-gradient(180deg,"+p.hex+",rgba(255,140,66,.25))")+'"></div></div>'
+            + '<div class="lb">'+x.rot+'</div></div>';
+        }).join("")
+      + '</div><div class="evolegend"><span><i style="background:'+p.hex+'"></i> entregue</span>'
+      + '<span><i style="background:rgba(255,255,255,.45)"></i> meta da semana</span>'
+      + '<span><i style="background:var(--ok)"></i> semana batida</span></div>';
+  }
+  h += '</div></div></section>';
+
+  /* --- tabela de areas --- */
+  const linhas = AREAS_DEF.map(a=>{
+    const vp=a.val(per)||0, va=a.val(semAtual)||0, vb=semAnt?(a.val(semAnt)||0):null;
+    let tend='<span class="tend flat">sem base</span>';
+    if(vb!==null && (va>0 || vb>0)){
+      const d=va-vb;
+      const cls = Math.abs(d)<0.05 ? "flat" : (d>0?"up":"dn");
+      const seta = Math.abs(d)<0.05 ? "=" : (d>0?"▲":"▼");
+      tend='<span class="tend '+cls+'">'+seta+' '+(a.un==="pp"?n1(Math.abs(d))+" pp":n0(Math.abs(d)))+'</span>';
+    }
+    return '<tr><td class="b">'+a.nm+' <span style="color:var(--dim);font-weight:600;font-size:12px">'+a.df+'</span></td>'
+      + '<td class="n" style="color:'+p.cor+';font-weight:800">'+a.fmt(vp)+'</td>'
+      + '<td class="n">'+a.fmt(va)+'</td>'
+      + '<td class="n">'+(vb===null?"-":a.fmt(vb))+'</td>'
+      + '<td class="n">'+tend+'</td></tr>';
+  }).join("");
+
+  h += '<section><div class="shead"><div><div class="eyebrow">Áreas de desempenho</div>'
+    + '<h2>As sete áreas do processo</h2></div>'
+    + '<div class="sub">Onde você está no período, como foi esta semana e para onde está indo.</div></div>'
+    + '<div class="card twrap"><table><thead><tr><th>Área</th><th class="n">No período</th>'
+    + '<th class="n">Esta semana</th><th class="n">Semana passada</th><th class="n">Tendência</th></tr></thead>'
+    + '<tbody>'+linhas+'</tbody></table></div>'
+    + leituraGargalo(bdr, per, p)
+    + '</section>';
+
+  return h;
+}
+
+/* leitura automatica: aponta a etapa com maior perda relativa */
+function leituraGargalo(bdr, per, p){
+  if(per.leads<20 || per.contatos===0){
+    return '<div class="alert info" style="margin-top:14px">Ainda há pouco volume para diagnóstico. '
+         + 'A leitura de gargalo aparece quando houver pelo menos 20 leads trabalhados e algum contato realizado.</div>';
+  }
+  const etapas=[
+    {nm:"conseguir que alguém atenda", taxa:pct(per.contatos,per.tentativas), acao:"revise horário de discagem e a qualidade da lista"},
+    {nm:"passar da recepção e chegar no decisor", taxa:pct(per.decisores,per.contatos), acao:"use o script de contorno em toda ligação atendida pela recepção"},
+    {nm:"transformar o decisor em reunião", taxa:pct(per.agendadas,per.decisores), acao:"trabalhe a abertura e o motivo da reunião"},
+    {nm:"fazer a reunião acontecer", taxa:per.agendadas?pct(per.realizadas,per.agendadas):0, acao:"confirme a reunião no dia anterior"}
+  ].filter(e=>e.taxa>0 || per.contatos>0);
+  let pior=null;
+  etapas.forEach(e=>{ if(pior===null || e.taxa<pior.taxa) pior=e; });
+  if(!pior) return "";
+  return '<div class="alert info" style="margin-top:14px">Sua etapa mais apertada agora é <b>'+pior.nm+'</b>, '
+       + 'em '+n1(pior.taxa)+'%. Foco da semana: '+pior.acao+'.</div>';
+}
+
+/* ========== ENTRADA ========== */
+let gateSel=null;
+function viewGate(){
+  const app=$("#app");
+  app.innerHTML = '<div class="gate"><div class="gatebox">'
+    + '<div class="mark" style="margin-bottom:22px">GENOS GROUP<b>.</b></div>'
+    + '<h1>Painel de <em>Prospecção Ativa.</em></h1>'
+    + '<p class="sub" style="margin-top:14px">Escolha o seu perfil para lançar o dia ou acompanhar a operação.</p>'
+    + '<div class="perfis" id="perfis"></div>'
+    + '<div class="pinbox" id="pinbox" hidden>'
+    +   '<div class="sub" id="pinlbl"></div>'
+    +   '<div class="pin">'
+    +     '<input inputmode="numeric" maxlength="1" aria-label="Dígito 1"><input inputmode="numeric" maxlength="1" aria-label="Dígito 2">'
+    +     '<input inputmode="numeric" maxlength="1" aria-label="Dígito 3"><input inputmode="numeric" maxlength="1" aria-label="Dígito 4">'
+    +   '</div>'
+    +   '<div class="err" id="pinerr"></div>'
+    + '</div>'
+    + '</div></div>';
+
+  const wrap=$("#perfis");
+  Object.keys(PESSOAS).forEach(id=>{
+    const p=PESSOAS[id];
+    const b=el("button","perfil");
+    b.type="button";
+    b.innerHTML = '<span class="av" style="background:'+p.hex+'">'+p.ini+'</span>'
+                + '<span class="nm">'+esc(p.nome)+'</span>'
+                + '<span class="rl">'+p.papel+'</span>';
+    b.onclick=()=>{ gateSel=id; document.querySelectorAll(".perfil").forEach(x=>x.classList.remove("on"));
+      b.classList.add("on"); abrirPin(id); };
+    wrap.appendChild(b);
+  });
+}
+function abrirPin(id){
+  const box=$("#pinbox"); box.hidden=false;
+  $("#pinlbl").textContent="Digite o PIN de "+PESSOAS[id].curto;
+  $("#pinerr").textContent="";
+  const ins=[...document.querySelectorAll(".pin input")];
+  ins.forEach(i=>i.value="");
+  ins[0].focus();
+  ins.forEach((inp,k)=>{
+    inp.oninput=()=>{ inp.value=inp.value.replace(/\D/g,"");
+      if(inp.value && ins[k+1]) ins[k+1].focus();
+      if(ins.every(x=>x.value)) conferirPin(id, ins.map(x=>x.value).join(""), ins); };
+    inp.onkeydown=e=>{ if(e.key==="Backspace" && !inp.value && ins[k-1]) ins[k-1].focus(); };
+  });
+}
+async function conferirPin(id, pin, ins){
+  $("#pinerr").textContent="Conferindo...";
+  ins.forEach(x=>x.disabled=true);
+  try{
+    const d = await api("/api/login", {method:"POST", corpo:{perfil:id, pin:pin}});
+    guardarToken(d.token);
+    PERFIL=id;
+    try{ localStorage.setItem("genosPerfil", id); }catch(e){}
+    render();
+    carregarEstado();
+  }catch(e){
+    ins.forEach(x=>{ x.disabled=false; x.value=""; });
+    $("#pinerr").textContent = e.codigo==="bloqueado"
+      ? "Muitas tentativas seguidas. Espere alguns minutos e tente de novo."
+      : e.codigo==="pin_invalido" ? "PIN incorreto. Tente de novo."
+      : "Não consegui falar com o servidor. Confira a internet.";
+    ins[0].focus();
+  }
+}
+
+/* ========== TOPO ========== */
+function topo(){
+  const p=PESSOAS[PERFIL];
+  const i=semanaAtual(); const s=SEMANAS[i];
+  const fer = FERIADOS[hojeISO()];
+  const t=el("div","top");
+  t.innerHTML =
+    '<div class="id">'
+    + '<span class="mark">GENOS GROUP<b>.</b></span>'
+    + '<span class="who"><span class="av" style="background:'+p.hex+'">'+p.ini+'</span>'
+    +   '<span><span class="nm">'+esc(p.nome)+'</span> <span class="rl">'+p.papel+'</span></span></span>'
+    + '<button class="lnk" type="button" id="sair">trocar perfil</button>'
+    + '</div>'
+    + '<div class="wk">Período: <b>31/08/2026 a 30/11/2026</b><br>'
+    +   'Semana em curso: <b>'+esc(s.rot)+'</b> · meta de <b>'+n0(metaSemana(s))+'</b> agendamento'+(metaSemana(s)===1?'':'s')+' por BDR'
+    +   (fer ? '<br><span style="color:var(--warn)">Hoje é feriado. Sem operação.</span>' : '')
+    + '</div>';
+  t.querySelector("#sair").onclick=()=>{ PERFIL=null; EDITANDO=null;
+    try{ localStorage.removeItem("genosPerfil"); }catch(e){} render(); };
+  return t;
+}
+
+function avisoLeitura(){
+  let h="";
+  if(SOMENTE_LEITURA){
+    h += '<div class="alert bad" style="margin-bottom:14px">Não consegui falar com o servidor, então este painel está em <b>modo leitura</b>. '
+       + 'Confira a internet e recarregue a página. <button class="btn sm" type="button" data-recarregar="1" style="margin-left:8px;vertical-align:2px">Tentar de novo</button></div>';
+  }
+  if(!ESTADO.lancamentos.length){
+    const bk = lerBackup();
+    if(bk){
+      h += '<div class="alert info" style="margin-bottom:14px">O painel está sem lançamentos, mas encontrei '
+         + '<b>'+bk.lancamentos.length+' lançamento'+(bk.lancamentos.length===1?"":"s")+'</b> guardado'
+         + (bk.lancamentos.length===1?"":"s")+' neste navegador'
+         + (bk.em?' (última gravação em '+dataBR(bk.em.slice(0,10))+')':'')+'. '
+         + 'Isso costuma acontecer quando uma versão nova do painel é publicada. '
+         + '<button class="btn sm" type="button" data-restaurar="1" style="margin-left:8px;vertical-align:2px">Restaurar</button></div>';
+    }
+  }
+  if(h) h = h.replace(/margin-bottom:14px/g,"margin-bottom:14px") + '<div style="height:8px"></div>';
+  return h;
+}
+
+/* ========== VIEW BDR ========== */
+function viewBDR(){
+  const app=$("#app"); app.innerHTML=""; app.appendChild(topo());
+  const p=PESSOAS[PERFIL];
+  const idx=semanaAtual(); const s=SEMANAS[idx];
+  const sem=totalSemana(PERFIL,idx);
+  const meta=metaSemana(s);
+  const perc=meta>0?pct(sem.agendadas,meta):0;
+  const g=ganhoDe(PERFIL);
+  const per=totalPeriodo(PERFIL);
+  const meus=lancsDe(PERFIL).slice().sort((a,b)=>b.data.localeCompare(a.data));
+
+  let h = avisoLeitura();
+
+  /* --- placar da semana --- */
+  h += '<section><div class="shead"><div>'
+    + '<div class="eyebrow">Sua semana</div><h2>'+esc(s.rot)+'</h2></div>'
+    + '<div class="sub">Meta da semana: '+n0(meta)+' agendamento'+(meta===1?'':'s')+'. Base de '+s.leads+' leads com rampa de '+Math.round(s.rampa*100)+'%.</div></div>'
+    + '<div class="grid g4">'
+    +   card_stat(n0(sem.leads), "Leads trabalhados na semana", "")
+    +   card_stat(n0(sem.tentativas), "Tentativas de ligação", sem.leads?n1(sem.tentativas/sem.leads)+" por lead":"")
+    +   card_stat(n0(sem.decisores), "Contatos com decisor", sem.contatos?pctTxt(sem.decisores,sem.contatos)+" dos contatos":"")
+    +   '<div class="stat" style="border-color:'+(perc>=100?"rgba(63,174,116,.4)":"var(--line)")+'">'
+    +     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+    +       '<div class="v" style="color:'+p.cor+'">'+n0(sem.agendadas)+'</div>'
+    +       '<span class="pill '+(perc>=100?"ok":perc>=70?"neutral":"warn")+'">'+Math.round(perc)+'% da meta</span></div>'
+    +     '<div class="k">Reuniões agendadas</div>'
+    +     '<div class="gauge"><div class="tr"><div class="fl" style="width:'+Math.min(perc,100)+'%;background:linear-gradient(90deg,rgba(255,140,66,.45),'+p.cor+')"></div>'
+    +       (perc>100?'<div class="mk" style="left:'+(100/perc*100)+'%"></div>':'')+'</div>'
+    +       '<div class="cp"><span>0</span><span>meta '+n0(meta)+'</span></div></div>'
+    +   '</div>'
+    + '</div></section>';
+
+  /* --- formulario --- */
+  h += '<section><div class="shead"><div>'
+    + '<div class="eyebrow">'+(EDITANDO?"Editando lançamento":"Lançamento do dia")+'</div>'
+    + '<h2>'+(EDITANDO?"Corrigir o dia "+dataBR(EDITANDO.data):"Como foi hoje?")+'</h2></div>'
+    + '<div class="sub">Leva menos de um minuto. Se o campo foi zero, deixe zero.</div></div>'
+    + '<div class="card"><form id="frm"><div class="form">'
+    + '<div class="fld"><label for="f_data">Data<i>Dia a que os números se referem</i></label>'
+    +   '<input type="date" id="f_data" required min="2026-08-31" max="2026-12-31"></div>'
+    + CAMPOS.map(c => '<div class="fld"><label for="f_'+c.k+'">'+c.r+'<i>'+c.h+'</i></label>'
+    +   '<input type="number" id="f_'+c.k+'" min="0" step="1" value="0" required></div>').join("")
+    + '<div class="fld wide"><label for="f_obs">Observação do dia<i>Opcional. O que travou, o que funcionou, o que precisa de ajuda</i></label>'
+    +   '<textarea id="f_obs" maxlength="400" placeholder="Ex: recepção da Clínica X pediu para ligar depois das 18h"></textarea></div>'
+    + '</div><div class="actions">'
+    +   '<button class="btn" type="submit" id="btnSalvar"'+(SOMENTE_LEITURA?" disabled":"")+'>'+(EDITANDO?"Salvar correção":"Salvar o dia")+'</button>'
+    +   (EDITANDO?'<button class="btn ghost sm" type="button" id="btnCancelar">Cancelar</button>':'')
+    +   '<span class="sub" id="dicaDia"></span>'
+    + '</div></form></div></section>';
+
+  /* --- seu desempenho individual --- */
+  h += blocoIndividual(PERFIL, {titulo:"Seu desempenho", h2:"Como você está indo"});
+
+  /* --- seus lancamentos --- */
+  h += '<section><div class="shead"><div><div class="eyebrow">Histórico</div><h2>Seus lançamentos</h2></div>'
+    + '<div class="sub">' + meus.length + ' dia' + (meus.length===1?"":"s") + ' lançado' + (meus.length===1?"":"s") + ' no período.</div></div>';
+  if(!meus.length){
+    h += '<div class="card"><div class="empty">Nenhum dia lançado ainda.<br>Preencha o formulário acima quando terminar o expediente.</div></div>';
+  }else{
+    h += '<div class="card twrap"><table><thead><tr><th>Dia</th>'
+      + CAMPOS.map(c=>'<th class="n">'+c.ab+'</th>').join("")
+      + '<th>Observação</th><th></th></tr></thead><tbody>'
+      + meus.slice(0,40).map(l=>'<tr><td class="b">'+dataBR(l.data)+' <span style="color:var(--dim);font-weight:600">'+diaSemana(l.data).slice(0,3)+'</span></td>'
+        + CAMPOS.map(c=>'<td class="n">'+n0(l[c.k])+'</td>').join("")
+        + '<td style="font-size:12px;color:var(--dim);max-width:220px">'+esc(l.obs||"")+'</td>'
+        + '<td style="white-space:nowrap"><button class="lnk" type="button" data-ed="'+l.id+'">editar</button>'
+        + ' <span style="color:var(--dim)">·</span> '
+        + '<button class="lnk" type="button" data-del="'+l.id+'">excluir</button></td></tr>').join("")
+      + '</tbody></table></div>';
+  }
+  h += '</section>';
+
+  app.insertAdjacentHTML("beforeend", h);
+  ligarFormulario();
+  app.querySelectorAll("[data-ed]").forEach(b=>{ b.onclick=()=>{
+    EDITANDO = ESTADO.lancamentos.find(x=>x.id===b.dataset.ed) || null; render();
+    window.scrollTo({top:0,behavior:"smooth"}); }; });
+  ligarApagar(app);
+}
+
+function card_stat(v,k,d){
+  return '<div class="stat"><div class="v">'+v+'</div><div class="k">'+k+'</div>'+(d?'<div class="d">'+d+'</div>':'')+'</div>';
+}
+function funil_linha(rot,val,taxa,destaque){
+  return '<div class="fst'+(destaque?" hi":"")+'"><span>'+rot+'</span>'
+       + '<span>'+(taxa?'<span class="rt">'+taxa+'</span>':'')+'<span class="v">'+n0(val)+'</span></span></div>';
+}
+
+/* ========== FORMULARIO ========== */
+function ligarFormulario(){
+  const f=$("#frm"); if(!f) return;
+  const alvo = EDITANDO;
+  $("#f_data").value = alvo ? alvo.data : hojeISO();
+  CAMPOS.forEach(c => { $("#f_"+c.k).value = alvo ? (alvo[c.k]||0) : 0; });
+  $("#f_obs").value = alvo ? (alvo.obs||"") : "";
+
+  const cancel=$("#btnCancelar");
+  if(cancel) cancel.onclick=()=>{ EDITANDO=null; render(); };
+
+  function checarDia(){
+    const d=$("#f_data").value;
+    const dica=$("#dicaDia"); if(!dica) return;
+    if(!d){ dica.textContent=""; return; }
+    if(FERIADOS[d]){ dica.textContent = diaSemana(d)+", "+dataBR(d)+". "+FERIADOS[d]; return; }
+    const ja = ESTADO.lancamentos.find(l=>l.bdr===PERFIL && l.data===d && (!alvo || l.id!==alvo.id));
+    dica.textContent = ja ? (diaSemana(d)+", "+dataBR(d)+". Já existe lançamento neste dia. Salvar vai substituir.")
+                          : (diaSemana(d)+", "+dataBR(d)+".");
+  }
+  $("#f_data").onchange = checarDia; checarDia();
+
+  f.onsubmit = async ev => {
+    ev.preventDefault();
+    if(SOMENTE_LEITURA) return;
+    const btn=$("#btnSalvar"); btn.disabled=true; btn.textContent="Salvando...";
+    const data=$("#f_data").value;
+    const reg = { id: alvo ? alvo.id : (Date.now().toString(36)+Math.random().toString(36).slice(2,7)),
+                  bdr: PERFIL, data: data, obs: $("#f_obs").value.trim(), em: new Date().toISOString() };
+    CAMPOS.forEach(c => { reg[c.k] = Math.max(0, parseInt($("#f_"+c.k).value,10)||0); });
+
+    await salvarLancamento(reg, alvo ? "Lançamento corrigido." : "Dia "+dataBR(data)+" salvo.");
+    EDITANDO=null; render();
+  };
+}
+
+/* ========== VIEW ADMIN ========== */
+function viewAdmin(){
+  const app=$("#app"); app.innerHTML=""; app.appendChild(topo());
+
+  const abas = [{k:"geral",r:"Visão geral da operação",c:"var(--a2)"},
+                {k:"rafael",r:"Rafael Abreu",c:"var(--raf)"},
+                {k:"isabella",r:"Isabella Borges",c:"var(--isa)"}];
+  const nav = el("div","tabs");
+  abas.forEach(a=>{
+    const b=el("button","tab"+(ABA===a.k?" on":""));
+    b.type="button";
+    b.innerHTML = (a.k==="geral"?"":'<span class="dt" style="background:'+a.c+'"></span>') + esc(a.r);
+    b.onclick=()=>{ ABA=a.k; try{ localStorage.setItem("genosAba",ABA); }catch(e){}
+      render(); window.scrollTo({top:0,behavior:"smooth"}); };
+    nav.appendChild(b);
+  });
+  app.appendChild(nav);
+
+  if(ABA==="rafael" || ABA==="isabella") return adminIndividual(ABA);
+  return adminGeral();
+}
+
+function adminIndividual(bdr){
+  const app=$("#app");
+  const p=PESSOAS[bdr];
+  const meus = lancsDe(bdr).slice().sort((a,b)=>b.data.localeCompare(a.data));
+  let h = avisoLeitura()
+    + blocoIndividual(bdr, {titulo:"Visão individual", h2:p.nome});
+
+  h += '<section><div class="shead"><div><div class="eyebrow">Conferência</div>'
+    + '<h2>Lançamentos de '+esc(p.curto)+'</h2></div>'
+    + '<div class="sub">'+meus.length+' registro'+(meus.length===1?"":"s")+' no período.</div></div>';
+  if(!meus.length){
+    h += '<div class="card"><div class="empty">Nenhum lançamento de '+esc(p.curto)+' ainda.</div></div>';
+  }else{
+    h += '<div class="card twrap"><table><thead><tr><th>Dia</th>'
+      + CAMPOS.map(c=>'<th class="n">'+c.ab+'</th>').join("")
+      + '<th>Observação</th><th></th></tr></thead><tbody>'
+      + meus.slice(0,120).map(l=>'<tr><td class="b">'+dataBR(l.data)+' <span style="color:var(--dim);font-weight:600">'+diaSemana(l.data).slice(0,3)+'</span></td>'
+        + CAMPOS.map(c=>'<td class="n">'+n0(l[c.k])+'</td>').join("")
+        + '<td style="font-size:12px;color:var(--dim);max-width:220px">'+esc(l.obs||"")+'</td>'
+        + '<td style="white-space:nowrap"><button class="lnk" type="button" data-del="'+l.id+'">apagar</button></td></tr>').join("")
+      + '</tbody></table></div>';
+  }
+  h += '</section>';
+
+  app.insertAdjacentHTML("beforeend", h);
+  ligarApagar(app);
+}
+
+function adminGeral(){
+  const app=$("#app");
+  const idx=semanaAtual(); const s=SEMANAS[idx]; const meta=metaSemana(s);
+  const vt=vendasTime(); const m=metaBatida(vt);
+  const per={}, sem={}, gan={};
+  BDRS.forEach(b=>{ per[b]=totalPeriodo(b); sem[b]=totalSemana(b,idx); gan[b]=ganhoDe(b); });
+  const lancs = ESTADO.lancamentos.slice().sort((a,b)=> b.data.localeCompare(a.data) || a.bdr.localeCompare(b.bdr));
+  const temDado = ESTADO.lancamentos.length>0;
+
+  let h = avisoLeitura();
+
+  /* 12 oportunidades */
+  let blocos="";
+  let i=1;
+  BDRS.forEach(b=>{ for(let k=0;k<Math.min(per[b].vendas, TETO_VENDAS);k++){ if(i<=TETO_VENDAS){ blocos+='<div class="opp '+(b==="rafael"?"r":"i")+'">'+i+'</div>'; i++; } } });
+  for(;i<=TETO_VENDAS;i++) blocos+='<div class="opp">'+i+'</div>';
+
+  h += '<section><div class="shead"><div><div class="eyebrow">Placar do time</div>'
+    + '<h2>As 12 oportunidades do período</h2></div>'
+    + '<div class="sub">Bateu 12, a operação trava e a prospecção para.</div></div>'
+    + '<div class="grid g21"><div class="card acc"><div class="opps">'+blocos+'</div>'
+    + '<div class="leg"><span><i style="background:var(--raf)"></i> Rafael · '+per.rafael.vendas+' venda'+(per.rafael.vendas===1?"":"s")+'</span>'
+    + '<span><i style="background:var(--isa)"></i> Isabella · '+per.isabella.vendas+' venda'+(per.isabella.vendas===1?"":"s")+'</span>'
+    + '<span><i style="background:rgba(255,255,255,.12)"></i> '+Math.max(TETO_VENDAS-vt,0)+' em disputa</span></div></div>'
+    + '<div class="grid g2" style="align-content:start">'
+    +   '<div class="stat"><div class="v" style="color:var(--a1)">'+vt+'<small> / 12</small></div>'
+    +     '<div class="k">Vendas no período</div><div class="d">'
+    +     (m ? m.rot+" batida. Bônus de "+brl(m.bonus)+" em divisão." : "Faltam "+(6-vt)+" para a meta mínima.")+'</div></div>'
+    +   '<div class="stat"><div class="v">'+Math.round(vt/TETO_VENDAS*100)+'%</div>'
+    +     '<div class="k">Do teto da operação</div><div class="d">'+esc(s.rot)+'.</div></div>'
+    + '</div></div></section>';
+
+  /* semana contra a rampa */
+  h += '<section><div class="shead"><div><div class="eyebrow">Semana em curso</div>'
+    + '<h2>Entrega contra a meta da semana</h2></div>'
+    + '<div class="sub">'+esc(s.rot)+'. Rampa de '+Math.round(s.rampa*100)+'% sobre a conversão-base de 13%. Meta: '+n0(meta)+' agendamento'+(meta===1?'':'s')+' por BDR.</div></div>'
+    + '<div class="grid g2">'
+    + BDRS.map(b=>{
+        const p=PESSOAS[b]; const t=sem[b]; const pc=meta>0?pct(t.agendadas,meta):0;
+        return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'
+          + '<div><div class="eyebrow" style="color:'+p.cor+'">'+esc(p.nome)+'</div>'
+          + '<div class="stat" style="border:none;background:none;padding:0"><div class="v" style="color:'+p.cor+'">'+n0(t.agendadas)+'</div>'
+          + '<div class="k">Agendamentos na semana</div></div></div>'
+          + '<span class="pill '+(pc>=100?"ok":pc>=70?"neutral":"warn")+'">'+Math.round(pc)+'% da meta</span></div>'
+          + '<div class="gauge"><div class="tr"><div class="fl" style="width:'+Math.min(pc,100)+'%;background:linear-gradient(90deg,rgba(255,140,66,.4),'+p.cor+')"></div></div>'
+          + '<div class="cp"><span>0</span><span>meta '+n0(meta)+'</span></div></div>'
+          + '<div class="d" style="font-size:12px;color:var(--dim);margin-top:12px">'
+          + n0(t.leads)+' leads · '+n0(t.tentativas)+' tentativas · '+n0(t.contatos)+' contatos · '+n0(t.decisores)+' decisores</div></div>';
+      }).join("")
+    + '</div></section>';
+
+  /* funil lado a lado */
+  h += '<section><div class="shead"><div><div class="eyebrow">Diagnóstico</div>'
+    + '<h2>Funil do período, lado a lado</h2></div>'
+    + '<div class="sub">Número absoluto e taxa de passagem. A taxa é que diz onde a porta está fechada.</div></div>'
+    + '<div class="grid g2">'
+    + BDRS.map(b=>{ const t=per[b]; const p=PESSOAS[b];
+        return '<div class="card"><div class="eyebrow" style="color:'+p.cor+';margin-bottom:12px">'+esc(p.nome)+'</div><div class="fun">'
+        + funil_linha("Leads trabalhados", t.leads, "")
+        + funil_linha("Tentativas de ligação", t.tentativas, t.leads?n1(t.tentativas/t.leads)+" por lead":"")
+        + funil_linha("Contatos realizados", t.contatos, pctTxt(t.contatos,t.tentativas)+" das tentativas")
+        + funil_linha("Contatos com decisor", t.decisores, pctTxt(t.decisores,t.contatos)+" dos contatos", true)
+        + funil_linha("Reuniões agendadas", t.agendadas, pctTxt(t.agendadas,t.decisores)+" dos decisores")
+        + funil_linha("Reuniões realizadas", t.realizadas, pctTxt(t.realizadas,t.agendadas)+" das agendadas")
+        + funil_linha("Propostas qualificadas", t.propostas, pctTxt(t.propostas,t.realizadas)+" das realizadas")
+        + funil_linha("Vendas fechadas", t.vendas, pctTxt(t.vendas,t.propostas)+" das propostas", true)
+        + '</div></div>';
+      }).join("")
+    + '</div></section>';
+
+  /* avaliacao por area */
+  const AREAS = AREAS_DEF.map(a=>({nm:a.nm, df:a.df, val:b=>a.val(per[b]), fmt:a.fmt}));
+  const lidera={rafael:0,isabella:0};
+  const areasHTML = AREAS.map(a=>{
+    const vr=a.val("rafael")||0, vi=a.val("isabella")||0, mx=Math.max(vr,vi);
+    let wn='<span class="wn" style="color:var(--dim)">sem dado ainda</span>';
+    if(mx>0 && vr!==vi){ const q=vr>vi?"rafael":"isabella"; lidera[q]++;
+      wn='<span class="wn" style="color:'+PESSOAS[q].cor+'">'+PESSOAS[q].curto+' lidera</span>'; }
+    else if(mx>0){ wn='<span class="wn" style="color:var(--muted)">empatados</span>'; }
+    return '<div class="area"><div class="hd"><div><span class="nm">'+a.nm+'</span> <span class="df">'+a.df+'</span></div>'+wn+'</div>'
+      + '<div class="cmp"><span class="w" style="color:var(--raf)">Rafael</span>'
+      +   '<div class="tr"><div class="fl" style="width:'+(mx?vr/mx*100:0)+'%;background:var(--raf)"></div></div>'
+      +   '<span class="v">'+a.fmt(vr)+'</span></div>'
+      + '<div class="cmp"><span class="w" style="color:var(--isa)">Isabella</span>'
+      +   '<div class="tr"><div class="fl" style="width:'+(mx?vi/mx*100:0)+'%;background:var(--isa)"></div></div>'
+      +   '<span class="v">'+a.fmt(vi)+'</span></div></div>';
+  }).join("");
+  const leadsTime=per.rafael.leads+per.isabella.leads, agTime=per.rafael.agendadas+per.isabella.agendadas;
+
+  h += '<section><div class="shead"><div><div class="eyebrow">Avaliação individual</div>'
+    + '<h2>Desempenho por área, no acumulado</h2></div>'
+    + '<div class="sub">Sete áreas. Quem lidera cada uma, e por quanto. Barras normalizadas pelo melhor dos dois.</div></div>'
+    + '<div class="card">'+areasHTML+'</div>'
+    + '<div class="grid g3" style="margin-top:14px">'
+    +   '<div class="stat"><div class="v" style="color:var(--raf);font-size:clamp(20px,2.2vw,32px)">'+lidera.rafael+' de 7</div>'
+    +     '<div class="k">Áreas lideradas por Rafael</div></div>'
+    +   '<div class="stat"><div class="v" style="color:var(--isa);font-size:clamp(20px,2.2vw,32px)">'+lidera.isabella+' de 7</div>'
+    +     '<div class="k">Áreas lideradas por Isabella</div></div>'
+    +   '<div class="stat"><div class="v" style="font-size:clamp(20px,2.2vw,32px)">'+pctTxt(agTime,leadsTime)+'</div>'
+    +     '<div class="k">Conversão de agendamento do time</div>'
+    +     '<div class="d">Conversão-base: 13%. Régua da semana: '+n1(CONVERSAO_BASE*s.rampa*100)+'%.</div></div>'
+    + '</div></section>';
+
+  /* acumulado */
+  h += '<section><div class="shead"><div><div class="eyebrow">Acumulado</div>'
+    + '<h2>O período inteiro, número a número</h2></div>'
+    + '<div class="sub">De 31/08 até hoje.</div></div>'
+    + '<div class="card twrap"><table><thead><tr><th>Indicador</th><th class="n">Rafael</th><th class="n">Isabella</th><th class="n">Time</th>'
+    + '<th class="n">Taxa Rafael</th><th class="n">Taxa Isabella</th></tr></thead><tbody>'
+    + (function(){
+        const razao=(a,b)=> b>0 ? n1(a/b)+" / lead" : "-";
+        const LIN=[["Leads trabalhados","leads",null,null],
+                   ["Tentativas de ligação","tentativas","leads","razao"],
+                   ["Contatos realizados","contatos","tentativas","pct"],
+                   ["Contatos com decisor","decisores","contatos","pct"],
+                   ["Reuniões agendadas","agendadas","decisores","pct"],
+                   ["Reuniões realizadas","realizadas","agendadas","pct"],
+                   ["No-shows","noshow","agendadas","pct"],
+                   ["Propostas qualificadas","propostas","realizadas","pct"]];
+        const taxa=(b,r)=> !r[3] ? "-" : (r[3]==="razao" ? razao(per[b][r[1]],per[b][r[2]]) : pctTxt(per[b][r[1]],per[b][r[2]]));
+        return LIN.map(r=>'<tr><td class="b">'+r[0]+'</td><td class="n">'+n0(per.rafael[r[1]])+'</td>'
+          + '<td class="n">'+n0(per.isabella[r[1]])+'</td>'
+          + '<td class="n">'+n0(per.rafael[r[1]]+per.isabella[r[1]])+'</td>'
+          + '<td class="n rafc">'+taxa("rafael",r)+'</td>'
+          + '<td class="n isac">'+taxa("isabella",r)+'</td></tr>').join("");
+      })()
+    + '<tr class="tot"><td>Vendas fechadas</td><td class="n">'+per.rafael.vendas+'</td><td class="n">'+per.isabella.vendas+'</td>'
+    +   '<td class="n">'+vt+'</td><td class="n rafc">'+pctTxt(per.rafael.vendas,per.rafael.propostas)+'</td>'
+    +   '<td class="n isac">'+pctTxt(per.isabella.vendas,per.isabella.propostas)+'</td></tr>'
+    + '</tbody></table></div></section>';
+
+  /* bonificacao */
+  h += '<section><div class="shead"><div><div class="eyebrow">Remuneração variável</div>'
+    + '<h2>Bonificação acumulada por BDR</h2></div>'
+    + '<div class="sub">Comissão da escada individual, R$ 25 por proposta e a prévia da divisão do bônus. Tudo por cima do fixo.</div></div>'
+    + '<div class="card twrap"><table><thead><tr><th>BDR</th><th class="n">Vendas</th><th class="n">Comissão da escada</th>'
+    + '<th class="n">Propostas × R$ 25</th><th class="n">Participação</th><th class="n">Prévia do bônus</th><th class="n">Total</th></tr></thead><tbody>'
+    + BDRS.map(b=>{ const g=gan[b];
+        return '<tr><td class="b" style="color:'+PESSOAS[b].cor+'">'+esc(PESSOAS[b].nome)+'</td>'
+        + '<td class="n">'+g.vendas+'</td><td class="n">'+brl(g.comissao)+'</td><td class="n">'+brl(g.propostas)+'</td>'
+        + '<td class="n '+(b==="rafael"?"rafc":"isac")+'">'+(vt?n1(g.part)+"%":"-")+'</td>'
+        + '<td class="n">'+brl(g.bonus)+'</td><td class="n '+(b==="rafael"?"rafc":"isac")+'">'+brl(g.total)+'</td></tr>';
+      }).join("")
+    + '<tr class="tot"><td>Time</td><td class="n">'+vt+'</td>'
+    +   '<td class="n">'+brl(gan.rafael.comissao+gan.isabella.comissao)+'</td>'
+    +   '<td class="n">'+brl(gan.rafael.propostas+gan.isabella.propostas)+'</td><td class="n">'+(vt?"100%":"-")+'</td>'
+    +   '<td class="n">'+brl(gan.rafael.bonus+gan.isabella.bonus)+'</td>'
+    +   '<td class="n">'+brl(gan.rafael.total+gan.isabella.total)+'</td></tr>'
+    + '</tbody></table>'
+    + '<div class="d" style="font-size:12px;color:var(--dim);margin-top:14px;line-height:1.55">'
+    + 'A prévia do bônus usa a maior meta já batida pelo time, dividida na proporção atual de vendas. '
+    + 'A proporção muda a cada venda nova e o valor final só fecha em 30/11.</div></div></section>';
+
+  /* lancamentos */
+  h += '<section><div class="shead"><div><div class="eyebrow">Conferência</div>'
+    + '<h2>Todos os lançamentos</h2></div>'
+    + '<div class="sub">'+lancs.length+' registro'+(lancs.length===1?"":"s")+'. Confira contra o Kommo e a API4COM quando quiser.</div></div>';
+  if(!temDado){
+    h += '<div class="card"><div class="empty">Nenhum lançamento ainda.<br>Os números aparecem aqui assim que o Rafael e a Isabella começarem a preencher.</div></div>';
+  }else{
+    h += '<div class="card twrap"><table><thead><tr><th>Dia</th><th>BDR</th>'
+      + CAMPOS.map(c=>'<th class="n">'+c.ab+'</th>').join("")
+      + '<th>Observação</th><th></th></tr></thead><tbody>'
+      + lancs.slice(0,120).map(l=>'<tr><td class="b">'+dataBR(l.data)+' <span style="color:var(--dim);font-weight:600">'+diaSemana(l.data).slice(0,3)+'</span></td>'
+        + '<td class="'+(l.bdr==="rafael"?"rafc":"isac")+'">'+esc(PESSOAS[l.bdr]?PESSOAS[l.bdr].curto:l.bdr)+'</td>'
+        + CAMPOS.map(c=>'<td class="n">'+n0(l[c.k])+'</td>').join("")
+        + '<td style="font-size:12px;color:var(--dim);max-width:220px">'+esc(l.obs||"")+'</td>'
+        + '<td style="white-space:nowrap"><button class="lnk" type="button" data-del="'+l.id+'">apagar</button></td></tr>').join("")
+      + '</tbody></table></div>';
+  }
+  h += '<div class="actions"><button class="btn ghost sm" type="button" id="btnCsv">Baixar CSV</button>'
+    + '<button class="btn ghost sm" type="button" id="btnPin">Trocar PINs</button></div></section>';
+
+  app.insertAdjacentHTML("beforeend", h);
+  ligarApagar(app);
+  const bc=$("#btnCsv"); if(bc) bc.onclick=baixarCsv;
+  const bp=$("#btnPin"); if(bp) bp.onclick=trocarPins;
+}
+
+function ligarApagar(app){
+  app.querySelectorAll("[data-del]").forEach(b=>{ b.onclick=async ()=>{
+    const l=ESTADO.lancamentos.find(x=>x.id===b.dataset.del); if(!l) return;
+    if(!confirm("Excluir o lançamento de "+(PESSOAS[l.bdr]?PESSOAS[l.bdr].curto:l.bdr)+" do dia "+dataBR(l.data)+"?\n\nEsta ação não tem volta.")) return;
+    await excluirLancamento(l.id, "Lançamento do dia "+dataBR(l.data)+" excluído.");
+    render(); }; });
+}
+
+/* ========== CSV E PINS ========== */
+async function baixarCsv(){
+  if(!ESTADO.lancamentos.length){ toast("Não há lançamentos para exportar ainda."); return; }
+  const cab=["data","bdr"].concat(CAMPOS.map(c=>c.k)).concat(["obs"]);
+  const linhas=[cab.join(";")].concat(
+    ESTADO.lancamentos.slice().sort((a,b)=>a.data.localeCompare(b.data)).map(l=>
+      cab.map(k=> k==="bdr" ? (PESSOAS[l.bdr]?PESSOAS[l.bdr].nome:l.bdr)
+                : k==="obs" ? '"'+String(l.obs||"").replace(/"/g,'""')+'"'
+                : (l[k]!=null?l[k]:"")).join(";")));
+  const csv="﻿"+linhas.join("\r\n");
+  try{
+    const url = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
+    const a = document.createElement("a");
+    a.href = url; a.download = "prospeccao-genos-"+hojeISO()+".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    toast("Arquivo enviado para download.","ok");
+  }catch(e){ toast("O download não foi concluído."); }
+}
+async function trocarPins(){
+  const quem = prompt("Trocar o PIN de quem? Digite: rafael, isabella ou gilvan");
+  if(!quem) return;
+  const id = quem.trim().toLowerCase();
+  if(!PESSOAS[id]){ toast("Perfil não encontrado. Use rafael, isabella ou gilvan."); return; }
+  const novo = prompt("Novo PIN de "+PESSOAS[id].curto+" (4 dígitos)");
+  if(!novo) return;
+  if(!/^\d{4}$/.test(novo.trim())){ toast("O PIN precisa ter exatamente 4 dígitos."); return; }
+  try{
+    await api("/api/pin", {method:"POST", corpo:{alvo:id, pin:novo.trim()}});
+    toast("PIN de "+PESSOAS[id].curto+" atualizado.","ok");
+  }catch(e){
+    if(e.codigo==="sem_sessao") sessaoCaiu();
+    else toast(e.message||"Não deu para trocar o PIN agora.","bad");
+  }
+}
+
+/* ========== RENDER E BOOT ========== */
+function render(){
+  if(!PERFIL) return viewGate();
+  if(PERFIL==="gilvan") return viewAdmin();
+  return viewBDR();
+}
+
+/* restauracao a partir da copia de seguranca do navegador */
+document.getElementById("app").addEventListener("click", async ev=>{
+  if(ev.target.closest("[data-recarregar]")){ toast("Buscando os lançamentos..."); await carregarEstado(); return; }
+  const b = ev.target.closest("[data-restaurar]");
+  if(!b) return;
+  const bk = lerBackup(); if(!bk) return;
+  if(!confirm("Restaurar "+bk.lancamentos.length+" lançamento(s) guardado(s) neste navegador?")) return;
+  await importarLancamentos(bk.lancamentos, "Lançamentos restaurados.");
+  render();
+});
+
+try{ TOKEN = localStorage.getItem(CHAVE_TOKEN) || null;
+     const salvo=localStorage.getItem("genosPerfil"); if(TOKEN && salvo && PESSOAS[salvo]) PERFIL=salvo;
+     const ab=localStorage.getItem("genosAba"); if(ab==="geral"||ab==="rafael"||ab==="isabella") ABA=ab; }catch(e){}
+render();
+
+(async function(){
+  /* sem sessao nao ha o que carregar: a tela de PIN vem primeiro */
+  if(!TOKEN || !PERFIL) return;
+  try{ await api("/api/eu"); }
+  catch(e){ if(e.codigo==="sem_sessao"){ sessaoCaiu(); return; } }
+  await carregarEstado();
+})();
+
+})();
+</script>
+
+</body>
+</html>
