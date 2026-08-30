@@ -70,8 +70,10 @@ Vá na aba **Actions → Publicar no Cloudflare → Run workflow**. Ou simplesme
 faça o merge desta branch na `main`, que ele dispara sozinho.
 
 A publicação cria o Worker, cria o lugar onde os lançamentos ficam guardados
-(se ainda não existir) e sobe a página. No fim, o passo *Publicar* mostra o
-endereço, algo como `https://painel-bdr-genos.SEU-USUARIO.workers.dev`.
+(se ainda não existir) e sobe a página. O endereço aparece no fim do passo
+*Publicar*.
+
+O painel está no ar em **https://painel-bdr-genos.group-656.workers.dev**.
 
 Rodar de novo é seguro: ele reaproveita o mesmo lugar de armazenamento e nunca
 apaga lançamento nenhum.
