@@ -71,7 +71,7 @@ faça o merge desta branch na `main`, que ele dispara sozinho.
 
 A publicação cria o Worker, cria o lugar onde os lançamentos ficam guardados
 (se ainda não existir) e sobe a página. No fim, o passo *Publicar* mostra o
-endereço, algo como `https://painelbdr.SEU-USUARIO.workers.dev`.
+endereço, algo como `https://painel-bdr-genos.SEU-USUARIO.workers.dev`.
 
 Rodar de novo é seguro: ele reaproveita o mesmo lugar de armazenamento e nunca
 apaga lançamento nenhum.
@@ -103,7 +103,7 @@ Não é preciso, mas fica registrado. Com o Node.js instalado, dentro da pasta:
 ```bash
 npm install
 npx wrangler login
-npx wrangler kv namespace create PAINEL
+npx wrangler kv namespace create painel-bdr-genos-estado
 ```
 
 O último comando imprime um `id`. Cole esse id no `wrangler.toml`, no lugar de

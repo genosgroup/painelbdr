@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-painelbdr
+  group: deploy-painel-bdr-genos
   cancel-in-progress: false
 
 jobs:
@@ -46,23 +46,35 @@ jobs:
         id: kv
         run: |
           set -euo pipefail
-          TITULO="painelbdr-PAINEL"
-          npx wrangler kv namespace list > /tmp/kv.json
-          ID=$(node -e '
-            const fs=require("fs");
-            const bruto=fs.readFileSync("/tmp/kv.json","utf8");
-            /* o wrangler as vezes imprime um cabecalho antes do JSON */
-            const a=bruto.indexOf("["), b=bruto.lastIndexOf("]");
-            const lista=(a>=0&&b>a)?JSON.parse(bruto.slice(a,b+1)):[];
-            const n=lista.find(x=>x.title===process.argv[1]);
-            process.stdout.write(n?n.id:"");
-          ' "$TITULO")
-          if [ -z "$ID" ]; then
-            echo "Namespace $TITULO nao existe ainda. Criando."
-            npx wrangler kv namespace create PAINEL | tee /tmp/kv-novo.txt
-            ID=$(grep -oE '[0-9a-f]{32}' /tmp/kv-novo.txt | head -1)
+          # O wrangler batiza o namespace exatamente com o nome passado no
+          # comando create, entao o mesmo TITULO serve para procurar e criar.
+          TITULO="painel-bdr-genos-estado"
+
+          procurar() {
+            npx wrangler kv namespace list > /tmp/kv.json
+            node -e '
+              const fs=require("fs");
+              const bruto=fs.readFileSync("/tmp/kv.json","utf8");
+              /* o wrangler as vezes imprime um cabecalho antes do JSON */
+              const a=bruto.indexOf("["), b=bruto.lastIndexOf("]");
+              const lista=(a>=0&&b>a)?JSON.parse(bruto.slice(a,b+1)):[];
+              const n=lista.find(x=>x.title===process.argv[1]);
+              process.stdout.write(n?n.id:"");
+            ' "$TITULO"
+          }
+
+          ID=$(procurar)
+          if [ -n "$ID" ]; then
+            echo "Reaproveitando o namespace \"$TITULO\" que ja existe."
           else
-            echo "Reaproveitando o namespace $TITULO que ja existe."
+            echo "Namespace \"$TITULO\" nao existe ainda. Criando."
+            if npx wrangler kv namespace create "$TITULO" | tee /tmp/kv-novo.txt; then
+              ID=$(grep -oE '[0-9a-f]{32}' /tmp/kv-novo.txt | head -1)
+            else
+              # criado entre a busca e o create: procura de novo em vez de falhar
+              echo "O create nao passou. Procurando de novo antes de desistir."
+              ID=$(procurar)
+            fi
           fi
           [ -n "$ID" ] || { echo "::error::Nao consegui descobrir o id do namespace KV."; exit 1; }
           echo "id=$ID" >> "$GITHUB_OUTPUT"
