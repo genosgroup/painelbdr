@@ -16,9 +16,13 @@ not_found_handling = "none"
 binding = "PAINEL"
 id = "COLE_O_ID_AQUI"
 
-# Dominio proprio. Descomente as tres linhas abaixo quando o dominio
-# genosgroup.com.br ja estiver na sua conta Cloudflare: no proximo deploy o
-# wrangler cria o registro de DNS sozinho.
-# [[routes]]
-# pattern = "painel.genosgroup.com.br"
-# custom_domain = true
+# Dominio proprio: painel.genosgroup.com.br ja esta ligado a este worker,
+# configurado direto no painel da Cloudflare.
+#
+# Deixamos de proposito sem bloco [[routes]] aqui. O wrangler so mexe em rotas
+# e dominios quando eles estao declarados na configuracao; sem o bloco ele nao
+# encosta no que foi configurado pelo painel. Declarar um dominio que ja existe
+# faria o deploy pedir confirmacao, o que trava numa esteira automatica.
+#
+# Se um dia o worker for recriado do zero, o dominio precisa ser religado no
+# painel da Cloudflare (Workers e Pages > painel-bdr-genos > Dominios).

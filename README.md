@@ -84,19 +84,17 @@ Os PINs da tabela acima vieram do painel original e já circularam. Entre como
 Gilvan, clique em **Trocar PINs** no fim da página e defina um PIN novo para
 cada pessoa antes de divulgar o link.
 
-## Usar o domínio painel.genosgroup.com.br
+## O domínio painel.genosgroup.com.br
 
-Quando o domínio `genosgroup.com.br` já estiver na sua conta Cloudflare, abra o
-`wrangler.toml`, descomente as três últimas linhas:
+Já está ligado a este worker, configurado direto no painel da Cloudflare. Nada a
+fazer no código.
 
-```toml
-[[routes]]
-pattern = "painel.genosgroup.com.br"
-custom_domain = true
-```
+O `wrangler.toml` não declara o domínio de propósito: o wrangler só mexe em
+rotas e domínios que estejam declarados na configuração, então, sem o bloco, os
+deploys automáticos não encostam no que foi configurado pelo painel.
 
-e publique de novo. O Cloudflare cria o registro de DNS sozinho e o painel passa
-a responder nesse endereço.
+Se algum dia o worker for recriado do zero, o domínio precisa ser religado em
+*Workers e Pages → painel-bdr-genos → Domínios*.
 
 ## Publicar do seu computador, se preferir
 
