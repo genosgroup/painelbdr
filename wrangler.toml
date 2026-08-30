@@ -9,9 +9,11 @@ directory = "./public"
 binding = "ASSETS"
 not_found_handling = "none"
 
-# Onde os lancamentos ficam guardados.
-# Crie o namespace com:  npx wrangler kv namespace create PAINEL
-# e cole o id que o comando imprimir no lugar do COLE_O_ID_AQUI.
+# Onde os lancamentos ficam guardados: o namespace KV painel-bdr-genos-estado.
+#
+# O id fica com COLE_O_ID_AQUI de proposito. A esteira do GitHub Actions procura
+# o namespace pelo nome e injeta o id certo na hora de publicar, entao ele nunca
+# precisa ser versionado. Para publicar do seu computador, veja o README.
 [[kv_namespaces]]
 binding = "PAINEL"
 id = "COLE_O_ID_AQUI"
