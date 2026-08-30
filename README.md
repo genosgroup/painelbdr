@@ -33,71 +33,92 @@ Regras que o servidor aplica sozinho:
 - Dez erros de PIN a partir do mesmo lugar bloqueiam novas tentativas por 10 minutos.
 - Sem estar logado não dá para ver nada, nem os números.
 
-## Subir no ar, passo a passo
+## Subir no ar
 
-Você faz isso uma vez só. Depois, publicar uma alteração é o passo 5 sozinho.
+O repositório já publica sozinho. Você só precisa dar ao GitHub uma chave da
+Cloudflare, uma vez, e depois todo push na `main` republica o painel.
 
-**1. Instalar o que é preciso**
+**1. Criar o token na Cloudflare**
 
-Precisa do Node.js instalado na máquina. Com o terminal aberto dentro da pasta
-do projeto:
+Vá em [Meu perfil → Tokens de API](https://dash.cloudflare.com/profile/api-tokens),
+clique em *Create Token* e escolha o modelo pronto **Edit Cloudflare Workers**.
+Ele já vem com as permissões certas (Workers e KV). Copie o token que aparecer —
+ele só é mostrado uma vez.
+
+**2. Pegar o id da conta**
+
+No painel da Cloudflare, em *Workers & Pages*, o **Account ID** aparece na
+coluna da direita. É uma sequência de letras e números.
+
+**3. Guardar os dois no GitHub**
+
+No repositório, em **Settings → Secrets and variables → Actions → New repository
+secret**, crie dois segredos com estes nomes exatos:
+
+| Nome | Valor |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | o token do passo 1 |
+| `CLOUDFLARE_ACCOUNT_ID` | o id do passo 2 |
+
+Segredo é diferente de arquivo: o valor fica guardado cifrado no GitHub, nunca
+aparece no código nem no log. Não coloque esses valores em nenhum arquivo do
+repositório.
+
+**4. Publicar**
+
+Vá na aba **Actions → Publicar no Cloudflare → Run workflow**. Ou simplesmente
+faça o merge desta branch na `main`, que ele dispara sozinho.
+
+A publicação cria o Worker, cria o lugar onde os lançamentos ficam guardados
+(se ainda não existir) e sobe a página. No fim, o passo *Publicar* mostra o
+endereço, algo como `https://painelbdr.SEU-USUARIO.workers.dev`.
+
+Rodar de novo é seguro: ele reaproveita o mesmo lugar de armazenamento e nunca
+apaga lançamento nenhum.
+
+**5. Trocar os PINs**
+
+Os PINs da tabela acima vieram do painel original e já circularam. Entre como
+Gilvan, clique em **Trocar PINs** no fim da página e defina um PIN novo para
+cada pessoa antes de divulgar o link.
+
+## Usar o domínio painel.genosgroup.com.br
+
+Quando o domínio `genosgroup.com.br` já estiver na sua conta Cloudflare, abra o
+`wrangler.toml`, descomente as três últimas linhas:
+
+```toml
+[[routes]]
+pattern = "painel.genosgroup.com.br"
+custom_domain = true
+```
+
+e publique de novo. O Cloudflare cria o registro de DNS sozinho e o painel passa
+a responder nesse endereço.
+
+## Publicar do seu computador, se preferir
+
+Não é preciso, mas fica registrado. Com o Node.js instalado, dentro da pasta:
 
 ```bash
 npm install
-```
-
-**2. Entrar na sua conta Cloudflare**
-
-```bash
 npx wrangler login
-```
-
-Abre o navegador, você autoriza e volta para o terminal.
-
-**3. Criar o lugar onde os lançamentos ficam guardados**
-
-```bash
 npx wrangler kv namespace create PAINEL
 ```
 
-O comando responde algo como:
-
-```
-[[kv_namespaces]]
-binding = "PAINEL"
-id = "a1b2c3d4e5f6..."
-```
-
-**4. Colar esse id no `wrangler.toml`**
-
-Abra o arquivo `wrangler.toml`, ache a linha:
-
-```toml
-id = "COLE_O_ID_AQUI"
-```
-
-e troque `COLE_O_ID_AQUI` pelo id que o passo 3 imprimiu. Salve o arquivo.
-
-**5. Publicar**
+O último comando imprime um `id`. Cole esse id no `wrangler.toml`, no lugar de
+`COLE_O_ID_AQUI`, e então:
 
 ```bash
 npx wrangler deploy
 ```
-
-No fim ele imprime o endereço do painel, algo como
-`https://painelbdr.SEU-USUARIO.workers.dev`. Esse é o link para mandar ao time.
-
-**6. Trocar os PINs**
-
-Os PINs da tabela acima são os que vieram do painel original e já circularam.
-Entre como Gilvan, clique em **Trocar PINs** no fim da página e defina um PIN
-novo para cada pessoa antes de divulgar o link.
 
 ## Mexer no painel sem publicar
 
 Para ver as alterações rodando na sua máquina, sem afetar o que está no ar:
 
 ```bash
+npm install
 npm run dev
 ```
 

@@ -1,0 +1,86 @@
+# Publica o painel no Cloudflare Workers.
+#
+# Roda sozinho a cada push na branch main, e tambem pode ser disparado a mao
+# em Actions > Publicar no Cloudflare > Run workflow.
+#
+# Precisa de dois segredos em Settings > Secrets and variables > Actions:
+#   CLOUDFLARE_API_TOKEN   token com permissao de editar Workers e KV
+#   CLOUDFLARE_ACCOUNT_ID  o id da conta Cloudflare
+name: Publicar no Cloudflare
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-painelbdr
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Conferir se os segredos estao configurados
+        run: |
+          faltou=0
+          [ -n "$CLOUDFLARE_API_TOKEN" ]  || { echo "::error::Falta o segredo CLOUDFLARE_API_TOKEN."; faltou=1; }
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || { echo "::error::Falta o segredo CLOUDFLARE_ACCOUNT_ID."; faltou=1; }
+          exit $faltou
+
+      # O lugar onde os lancamentos ficam guardados. Se ja existir, reaproveita;
+      # se nao existir, cria. Rodar de novo nunca apaga nem duplica os dados.
+      - name: Garantir o namespace KV
+        id: kv
+        run: |
+          set -euo pipefail
+          TITULO="painelbdr-PAINEL"
+          npx wrangler kv namespace list > /tmp/kv.json
+          ID=$(node -e '
+            const fs=require("fs");
+            const bruto=fs.readFileSync("/tmp/kv.json","utf8");
+            /* o wrangler as vezes imprime um cabecalho antes do JSON */
+            const a=bruto.indexOf("["), b=bruto.lastIndexOf("]");
+            const lista=(a>=0&&b>a)?JSON.parse(bruto.slice(a,b+1)):[];
+            const n=lista.find(x=>x.title===process.argv[1]);
+            process.stdout.write(n?n.id:"");
+          ' "$TITULO")
+          if [ -z "$ID" ]; then
+            echo "Namespace $TITULO nao existe ainda. Criando."
+            npx wrangler kv namespace create PAINEL | tee /tmp/kv-novo.txt
+            ID=$(grep -oE '[0-9a-f]{32}' /tmp/kv-novo.txt | head -1)
+          else
+            echo "Reaproveitando o namespace $TITULO que ja existe."
+          fi
+          [ -n "$ID" ] || { echo "::error::Nao consegui descobrir o id do namespace KV."; exit 1; }
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "Namespace em uso: $ID"
+
+      - name: Apontar o wrangler.toml para o namespace
+        run: |
+          set -euo pipefail
+          sed -i 's/^id = ".*"$/id = "${{ steps.kv.outputs.id }}"/' wrangler.toml
+          grep '^id =' wrangler.toml
+
+      - name: Publicar
+        run: npx wrangler deploy
+
+      - name: Onde o painel ficou
+        run: |
+          echo "### Painel publicado" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "O endereco aparece no passo **Publicar**, na linha que comeca com \`https://\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Namespace KV: \`${{ steps.kv.outputs.id }}\`" >> "$GITHUB_STEP_SUMMARY"
